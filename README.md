@@ -4,11 +4,11 @@ A minimal [exe.dev](https://exe.dev) base image for **deployment targets** — V
 that run one service and are never developed on.
 
 ```sh
-ssh exe.dev new --name=my-service --image=ghcr.io/ryanlewis/exeslim:<build-id>
+ssh exe.dev new --name=my-service --image=ghcr.io/kdheepak/exeslim:<build-id>
 ```
 
 Take `<build-id>` from the
-[package page](https://github.com/ryanlewis/exeslim/pkgs/container/exeslim) — it
+[package page](https://github.com/kdheepak/exeslim/pkgs/container/exeslim) — it
 looks like `2026-07-26.20.1`. `:latest` works too, but exe.dev caches it for up
 to an hour — [picking a tag](#picking-a-tag).
 
@@ -207,19 +207,19 @@ on the same image as one that already exists. Otherwise `:latest` is the easier
 call.
 
 A build id looks like `2026-07-26.20.1`. The current list is on the
-[package page](https://github.com/ryanlewis/exeslim/pkgs/container/exeslim);
+[package page](https://github.com/kdheepak/exeslim/pkgs/container/exeslim);
 this README quotes the *format* rather than a specific id on purpose, since a
 docs-only commit publishes a new build and would immediately stale it.
 
 ```sh
-ssh exe.dev new --name=my-service --image=ghcr.io/ryanlewis/exeslim:<build-id>
+ssh exe.dev new --name=my-service --image=ghcr.io/kdheepak/exeslim:<build-id>
 ```
 
 Or the digest, immutable by construction:
 
 ```sh
 ssh exe.dev new --name=my-service \
-  --image=ghcr.io/ryanlewis/exeslim@sha256:<digest>
+  --image=ghcr.io/kdheepak/exeslim@sha256:<digest>
 ```
 
 ### Notes
@@ -229,8 +229,8 @@ keep the package private, pass a token with `read:packages`:
 
 ```sh
 ssh exe.dev new --name=my-service \
-  --image=ghcr.io/ryanlewis/exeslim:<build-id> \
-  --registry-auth='"ryanlewis:ghp_yourtoken"'
+  --image=ghcr.io/kdheepak/exeslim:<build-id> \
+  --registry-auth='"kdheepak:ghp_yourtoken"'
 ```
 
 > exe.dev's SSH command parser splits arguments on spaces, so anything

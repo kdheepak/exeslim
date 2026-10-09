@@ -1,19 +1,21 @@
-# exeslim — a minimal exe.dev base image for deployment targets.
-#
-# exeuntu is deliberately a batteries-included agent workstation: it runs
-# `unminimize`, reinstalls every package to restore man pages, then pulls in
-# locales-all, ubuntu-server/standard/dev-tools, build-essential, Chrome + the
-# GTK stack, ffmpeg, imagemagick, mitmproxy, docker, Go, uv, and the Claude /
-# Codex / pi agents. That lands at ~3.4 GB before your app. Correct for a box
-# where an agent might need anything; pure overhead for one static binary.
-#
-# This image drops all of that but keeps every piece of exe.dev *platform*
-# wiring, correlated line-by-line against exeuntu's Dockerfile.
-#
-# NOT for interactive/agent VMs — no compiler, no python, no docker, no git.
-# Use exeuntu for those.
+# exeslim — a small exe.dev image with Shelley and mise-managed pi.
+# No preinstalled language toolchains, container engine, or browser.
 
-FROM ubuntu:24.04@sha256:33ceb71981b602c1a7443a53469e4dba065f7503eab3078a2d7a57a2ab987517
+FROM ubuntu:24.04@sha256:33ceb71981b602c1a7443a53469e4dba065f7503eab3078a2d7a57a2ab987517 AS base
+
+FROM base AS pi-catalog
+RUN apt-get update \
+	&& apt-get install -y --no-install-recommends ca-certificates curl jq \
+	&& rm -rf /var/lib/apt/lists/*
+COPY vm/pi-catalog.jq /validate-catalog.jq
+# A new build ID refreshes pricing without invalidating the tool installation.
+ARG BUILD_ID=dev
+RUN test -n "$BUILD_ID" \
+	&& curl --fail --show-error --silent --location --retry 3 --max-time 60 \
+		https://exe.dev/llm-gateway-models.json --output /catalog.json \
+	&& jq --slurp --exit-status --from-file /validate-catalog.jq /catalog.json > /dev/null
+
+FROM base
 
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
@@ -29,12 +31,12 @@ RUN apt-get update \
 		dist-upgrade \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 		systemd systemd-sysv dbus dbus-user-session \
-		ca-certificates curl \
+		ca-certificates curl rsync \
 		# iproute2 for `ss`. ~1 MB, and it is the difference between seeing
 		# and guessing when a unit is active but the proxy returns nothing —
 		# 0.0.0.0:8000 (proxy can reach it) vs 127.0.0.1:8000 (it cannot).
 		iproute2 \
-		sudo tzdata locales \
+		sudo tzdata locales ncurses-bin \
 	# en_US + en_GB only; exeuntu installs locales-all, which is ~200 MB.
 	# en_US.UTF-8 is the default as the least surprising for anyone else who
 	# lands on the box. See the ENV LANG note below for how to override.
@@ -46,6 +48,10 @@ RUN apt-get update \
 	&& rm -f /usr/sbin/policy-rc.d \
 	&& apt-get clean \
 	&& rm -rf /var/lib/apt/lists/*
+
+COPY vm/terminfo/ /usr/share/doc/ghostty-terminfo/
+RUN tic -x -o /usr/share/terminfo /usr/share/doc/ghostty-terminfo/xterm-ghostty.terminfo \
+	&& infocmp -x -A /usr/share/terminfo xterm-ghostty > /dev/null
 
 # --- systemd, tuned for exe.dev's container-as-VM environment -----------------
 # Units that hang, fail noisily, or fight the platform. Masking is safe for
@@ -111,13 +117,18 @@ RUN systemctl mask -- \
 RUN echo '/dev/vda / ext4 defaults,x-systemd.growfs 0 1' >/etc/fstab
 
 # Stop systemd wiping /tmp at boot; it races non-systemd users that run at boot.
-COPY tmpfiles-tmp.conf /etc/tmpfiles.d/tmp.conf
+COPY vm/tmpfiles-tmp.conf /etc/tmpfiles.d/tmp.conf
 
 # Makes `new --setup-script` work. Without this unit the flag is accepted and
 # then silently does nothing.
-COPY exe-setup.service /etc/systemd/system/exe-setup.service
+COPY vm/exe-setup.service /etc/systemd/system/exe-setup.service
 RUN chmod 644 /etc/systemd/system/exe-setup.service \
 	&& systemctl enable exe-setup.service
+
+# exe.dev installs the binary; these units start Shelley on demand.
+COPY vm/shelley.service vm/shelley.socket /etc/systemd/system/
+RUN chmod 644 /etc/systemd/system/shelley.service /etc/systemd/system/shelley.socket \
+	&& systemctl enable shelley.socket
 
 # --- exedev user -------------------------------------------------------------
 # Rename the stock ubuntu user (uid 1000) rather than delete/recreate, so uid,
@@ -126,7 +137,7 @@ RUN usermod -l exedev -c "exe.dev user" ubuntu \
 	&& groupmod -n exedev ubuntu \
 	&& mv /home/ubuntu /home/exedev \
 	&& usermod -d /home/exedev exedev \
-	&& usermod -aG sudo exedev \
+	&& usermod -aG sudo,systemd-journal exedev \
 	&& sed -i 's/^ubuntu:/exedev:/' /etc/subuid /etc/subgid \
 	&& printf 'exedev ALL=(ALL) NOPASSWD:ALL\nDefaults:exedev verifypw=any\n' >/etc/sudoers.d/exedev \
 	&& chmod 0440 /etc/sudoers.d/exedev \
@@ -134,31 +145,41 @@ RUN usermod -l exedev -c "exe.dev user" ubuntu \
 	&& mkdir -p /var/lib/systemd/linger \
 	&& touch /var/lib/systemd/linger/exedev
 
-RUN printf 'export PATH="$HOME/.local/bin:$PATH"\nexport XDG_RUNTIME_DIR="/run/user/$(id -u)"\n' \
-		>>/home/exedev/.bashrc \
-	&& printf 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"\n' >>/home/exedev/.profile \
+# SSH commands need this PATH before .bashrc returns for noninteractive shells.
+RUN sed -i '1i export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"' /home/exedev/.bashrc \
+	&& printf 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"\n' >>/home/exedev/.bashrc \
+	&& printf 'export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"\nexport XDG_RUNTIME_DIR="/run/user/$(id -u)"\n' \
+		>>/home/exedev/.profile \
 	&& rm -rf /etc/update-motd.d/* /etc/motd \
 	&& touch /home/exedev/.hushlogin \
 	&& chown exedev:exedev /home/exedev/.hushlogin /home/exedev/.bashrc /home/exedev/.profile
 
-# Agent context. No agent ships in this image, but one may be installed later
-# (`exe.dev/install-shelley`, or a hand-installed Claude/Codex/pi), and these
-# files cost ~1 KB. Canonical copy lives at the XDG path Shelley reads, with
-# the other agents symlinked to it — same layout as exeuntu.
-COPY AGENTS.md /home/exedev/.config/shelley/AGENTS.md
-RUN mkdir -p /home/exedev/.claude /home/exedev/.codex /home/exedev/.pi \
-	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.claude/CLAUDE.md \
-	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.codex/AGENTS.md \
-	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.pi/AGENTS.md \
-	&& chown -R exedev:exedev \
-		/home/exedev/.config /home/exedev/.claude /home/exedev/.codex /home/exedev/.pi
+# Share VM instructions between Shelley and pi.
+COPY vm/AGENTS.md /home/exedev/.config/shelley/AGENTS.md
+RUN mkdir -p /home/exedev/.pi/agent \
+	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.pi/agent/AGENTS.md \
+	&& chown -R exedev:exedev /home/exedev/.config /home/exedev/.pi
+
+# Use standalone pi; no separate Node.js or npm installation is needed.
+COPY --from=ghcr.io/jdx/mise:2026.10.3@sha256:331890e7116dd3dbe6244900b75d1cb9aa4def4891181521801e4f7e9a3e50f7 /usr/local/bin/mise /usr/local/bin/mise
+COPY --chown=exedev:exedev vm/mise.toml /home/exedev/.config/mise/config.toml
+ENV PATH="/home/exedev/.local/share/mise/shims:/home/exedev/.local/bin:${PATH}"
+USER exedev
+RUN HOME=/home/exedev mise install \
+	&& HOME=/home/exedev mise exec -- pi --version \
+	&& HOME=/home/exedev mise exec -- fd --version \
+	&& HOME=/home/exedev mise exec -- rg --version \
+	&& rm -rf /home/exedev/.cache/mise /home/exedev/.local/share/mise/downloads
+USER root
+COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/
+COPY --from=pi-catalog --chown=exedev:exedev /catalog.json /home/exedev/.pi/agent/extensions/exe-dev/catalog.json
 
 # exe.dev supplies its own sshd/sftp-server/sh from /exe.dev/bin, so no
 # openssh-server here. Verified against a stock ubuntu:24.04 VM.
 #
 # The file MUST be named `init`: exe.dev's exetini decides this is an init
 # from the basename and execs it rather than forking it.
-COPY init /usr/local/bin/init
+COPY vm/init /usr/local/bin/init
 RUN chmod +x /usr/local/bin/init
 
 # Empty the machine ID that systemd's and dbus's package configuration baked in
@@ -171,10 +192,8 @@ RUN chmod +x /usr/local/bin/init
 RUN : >/etc/machine-id \
 	&& ln -sf /etc/machine-id /var/lib/dbus/machine-id
 
-# Sets the default proxy port. Without an EXPOSE, exe.dev defaults to :80
-# (verified on a stock ubuntu:24.04 VM); exeuntu exposes 8000 and 9999, the
-# latter being Shelley's. We have no Shelley, so 8000 alone.
-EXPOSE 8000
+# Expose the web server ports
+EXPOSE 8000 9999
 
 # Default locale for systemd services and non-SSH contexts. Three ways to
 # override, in increasing order of precedence:
@@ -190,8 +209,7 @@ EXPOSE 8000
 ENV LANG=en_US.UTF-8
 
 LABEL "exe.dev/login-user"="exedev"
-# Add this if you want Shelley (and `new --prompt`) on VMs from this image:
-# LABEL "exe.dev/install-shelley"="true"
+LABEL "exe.dev/install-shelley"="true"
 
 # --- OCI metadata -------------------------------------------------------------
 # Declared here, at the end, on purpose: an ARG invalidates the build cache from
@@ -202,10 +220,11 @@ LABEL "exe.dev/login-user"="exedev"
 # that label as "24.04" and it is inherited, so without an override every scanner
 # and `docker inspect` reports this image's version as Ubuntu's.
 ARG BUILD_ID=dev
+RUN printf '%s\n' "$BUILD_ID" > /etc/exeslim-build-id
 LABEL org.opencontainers.image.title="exeslim" \
-	org.opencontainers.image.description="Minimal exe.dev base image for deployment targets: systemd and full platform wiring, without the agent workstation toolchain." \
-	org.opencontainers.image.source="https://github.com/ryanlewis/exeslim" \
-	org.opencontainers.image.url="https://github.com/ryanlewis/exeslim" \
+	org.opencontainers.image.description="Small exe.dev base image with systemd, Shelley support, mise-managed pi, and rsync." \
+	org.opencontainers.image.source="https://github.com/kdheepak/exeslim" \
+	org.opencontainers.image.url="https://github.com/kdheepak/exeslim" \
 	org.opencontainers.image.licenses="MIT" \
 	org.opencontainers.image.base.name="docker.io/library/ubuntu:24.04" \
 	org.opencontainers.image.version="${BUILD_ID}"

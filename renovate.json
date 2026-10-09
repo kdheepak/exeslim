@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>ryanlewis/renovate-config"],
+  "extends": ["github>kdheepak/renovate-config"],
   "packageRules": [
     {
       "description": "Belt-and-braces LTS guard. Renovate's ubuntu versioning already treats only LTS releases as stable, so interim releases like 24.10 should not be offered anyway — this makes that explicit and survives a default changing. Digest updates still flow (updateType 'digest'), so the base layer stays current; the every-two-years LTS bump stays a deliberate human decision.",

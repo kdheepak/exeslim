@@ -1,0 +1,14 @@
+[tasks.build-id]
+description = "Print the latest published build ID"
+quiet = true
+output = "interleave"
+tools = { crane = "0.22.1", jq = "1.8.2" }
+shell = "bash -euo pipefail -c"
+run = '''
+# Keep this public lookup independent of local Docker credentials.
+docker_config=$(mktemp -d "$PWD/.build-id-auth.XXXXXX")
+trap 'rm -rf "$docker_config"' EXIT
+printf '{}\n' > "$docker_config/config.json"
+DOCKER_CONFIG="$docker_config" crane config --platform linux/amd64 ghcr.io/kdheepak/exeslim:latest |
+  jq -er '.config.Labels["org.opencontainers.image.version"] | select(type == "string" and length > 0)'
+'''

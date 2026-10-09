@@ -1,0 +1,10 @@
+{
+  "name": "pi-exe-dev",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "license": "Apache-2.0",
+  "pi": {
+    "extensions": ["./index.ts"]
+  }
+}

@@ -1,0 +1,4 @@
+[tools]
+"aqua:BurntSushi/ripgrep" = "15.2.0"
+"aqua:earendil-works/pi" = "1.1.0"
+"aqua:sharkdp/fd" = "10.5.0"

@@ -1,0 +1,11 @@
+[Unit]
+Description=Discover exeslim setup after boot and retry incomplete setup
+
+[Timer]
+OnBootSec=5s
+OnUnitInactiveSec=5min
+AccuracySec=1s
+Unit=exeslim-setup.service
+
+[Install]
+WantedBy=timers.target

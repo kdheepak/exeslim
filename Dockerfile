@@ -1,5 +1,5 @@
 # exeslim — a small exe.dev image with Shelley and mise-managed pi.
-# No preinstalled language toolchains, container engine, or browser.
+# No compiler, container engine, or browser.
 
 FROM ubuntu:24.04@sha256:33ceb71981b602c1a7443a53469e4dba065f7503eab3078a2d7a57a2ab987517 AS base
 
@@ -20,11 +20,8 @@ FROM base
 SHELL ["/bin/bash", "-euxo", "pipefail", "-c"]
 
 RUN apt-get update \
-	# Pull security/bugfix updates for packages already in the base layer.
-	# Without this we ship whatever was current when Canonical last rebuilt
-	# ubuntu:24.04, which can be months behind — and since the packages we
-	# install by name are only a handful, everything else would stay stale
-	# no matter how often the weekly job reruns. Same reasoning as exeuntu.
+	# Start new VMs with current fixes rather than waiting for the first
+	# automatic update.
 	&& DEBIAN_FRONTEND=noninteractive apt-get -y \
 		-o Dpkg::Options::=--force-confold \
 		-o Dpkg::Options::=--force-confdef \
@@ -37,6 +34,7 @@ RUN apt-get update \
 		# 0.0.0.0:8000 (proxy can reach it) vs 127.0.0.1:8000 (it cannot).
 		iproute2 \
 		sudo tzdata locales ncurses-bin \
+		unattended-upgrades needrestart update-notifier-common \
 	# en_US + en_GB only; exeuntu installs locales-all, which is ~200 MB.
 	# en_US.UTF-8 is the default as the least surprising for anyone else who
 	# lands on the box. See the ENV LANG note below for how to override.
@@ -85,9 +83,6 @@ RUN systemctl mask -- \
 		man-db.timer \
 		dpkg-db-backup.timer \
 		e2scrub_all.timer \
-		apt-daily.timer \
-		apt-daily-upgrade.timer \
-		unattended-upgrades.service \
 		iscsid.socket \
 		dm-event.socket \
 		ubuntu-fan.service \
@@ -110,6 +105,10 @@ RUN systemctl mask -- \
 	&& printf '[Journal]\nStorage=persistent\n' \
 		>/etc/systemd/journald.conf.d/persistent.conf \
 	&& systemctl set-default multi-user.target
+
+COPY vm/apt-upgrades.conf /etc/apt/apt.conf.d/52exeslim-upgrades
+RUN apt-config dump > /dev/null \
+	&& systemctl enable apt-daily.timer apt-daily-upgrade.timer unattended-upgrades.service
 
 # CRITICAL: without this, systemd-growfs@-.service never runs and the root
 # filesystem stays at its original size when the disk is grown — so
@@ -192,7 +191,8 @@ RUN chmod +x /usr/local/bin/init
 # re-enabling the ones disabled above. Must stay after the last apt-get install,
 # or a later package configure bakes in a fresh one. Mirrors exeuntu.
 RUN : >/etc/machine-id \
-	&& ln -sf /etc/machine-id /var/lib/dbus/machine-id
+	&& ln -sf /etc/machine-id /var/lib/dbus/machine-id \
+	&& rm -f /run/reboot-required /run/reboot-required.pkgs
 
 # Expose the web server ports
 EXPOSE 8000 9999

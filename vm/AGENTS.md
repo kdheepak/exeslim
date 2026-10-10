@@ -16,7 +16,7 @@ Do not assume the full exeuntu toolbox is present.
 **pi:** Run `pi`. The bundled extension uses attached exe.dev LLM integrations.
 Mise shims are on PATH. Its VM config is `~/.config/mise/config.toml`.
 
-**Not installed:** compiler/`build-essential`, Python, Node.js, Go, uv, git,
+**Not installed:** compiler/`build-essential`, Node.js, Go, uv, git,
 Docker, nginx, or Chrome. No Claude, Codex, or OpenCode agent is installed.
 Use mise for additional tools or `sudo apt-get install <pkg>` for system
 packages only when needed. Prefer building artifacts elsewhere and copying
@@ -24,6 +24,24 @@ them here.
 
 **Services are systemd units.** Start/stop with `systemctl`. Read logs with
 `journalctl -u <name>` without sudo. Journals persist across reboots.
+
+**Ubuntu updates run daily.** Security and stable-release updates are enabled;
+proposed updates and backports are not. Python and Perl support the system
+update tools. These updates do not update mise-managed tools or Shelley.
+Read update logs with `journalctl -u apt-daily-upgrade.service`.
+
+The VM reboots when an update requests it, even while users are logged in.
+To disable automatic reboots on this VM, keep updates enabled and run:
+
+```sh
+printf '%s\n' 'Unattended-Upgrade::Automatic-Reboot "false";' \
+  | sudo tee /etc/apt/apt.conf.d/99-no-auto-reboot
+```
+
+This overrides `/etc/apt/apt.conf.d/52exeslim-upgrades` for future update runs.
+Updates can still restart services. Remove the local override to restore
+automatic reboots. If a reboot is already scheduled, cancel it with
+`sudo shutdown -c`.
 
 **The app is normally a prebuilt binary** deployed by `scp`/`rsync` from a
 laptop or CI, then restarted via systemd. Anything you install directly on the

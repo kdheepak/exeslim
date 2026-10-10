@@ -35,6 +35,7 @@ RUN apt-get update \
 		iproute2 \
 		sudo tzdata locales ncurses-bin \
 		unattended-upgrades needrestart update-notifier-common \
+	&& git --version \
 	# en_US + en_GB only; exeuntu installs locales-all, which is ~200 MB.
 	# en_US.UTF-8 is the default as the least surprising for anyone else who
 	# lands on the box. See the ENV LANG note below for how to override.

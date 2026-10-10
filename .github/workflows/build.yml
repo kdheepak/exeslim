@@ -8,9 +8,7 @@ on:
   # fail after merge, on the run that publishes :latest.
   pull_request:
     branches: [main]
-  # Weekly rebuild picks up Ubuntu security updates. exe.dev VMs ship with the
-  # apt-daily timers masked, so rebuilding the image is how patches land —
-  # recreate or rebase a VM to pick them up.
+  # Keep new VMs current. Running VMs update Ubuntu packages independently.
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:

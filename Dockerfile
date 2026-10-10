@@ -29,6 +29,7 @@ RUN apt-get update \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 		systemd systemd-sysv dbus dbus-user-session \
 		ca-certificates curl rsync git jq \
+		util-linux openssh-client sqlite3 \
 		# iproute2 for `ss`. ~1 MB, and it is the difference between seeing
 		# and guessing when a unit is active but the proxy returns nothing —
 		# 0.0.0.0:8000 (proxy can reach it) vs 127.0.0.1:8000 (it cannot).
@@ -177,6 +178,7 @@ RUN HOME=/home/exedev mise install \
 	&& HOME=/home/exedev mise exec -- pi --version \
 	&& HOME=/home/exedev mise exec -- fd --version \
 	&& HOME=/home/exedev mise exec -- rg --version \
+	&& HOME=/home/exedev mise exec -- restic version \
 	&& rm -rf /home/exedev/.cache/mise /home/exedev/.local/share/mise/downloads
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/

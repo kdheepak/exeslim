@@ -9,8 +9,10 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 
 ## This VM runs exeslim, not exeuntu
 
-This deployment image includes systemd, TLS roots, curl, rsync, Git, jq, and mise.
-Mise installs standalone pi, fd, and ripgrep. exe.dev installs Shelley when it creates the VM.
+This deployment image includes systemd, TLS roots, curl, rsync, Git, jq,
+flock, the OpenSSH client, sqlite3, and mise.
+Mise installs standalone pi, fd, ripgrep, and restic.
+exe.dev installs Shelley when it creates the VM.
 Do not assume the full exeuntu toolbox is present.
 
 **Image build:** `/etc/exeslim-build-id` contains this image's build ID.

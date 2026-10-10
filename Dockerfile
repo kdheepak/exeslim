@@ -145,6 +145,8 @@ RUN usermod -l exedev -c "exe.dev user" ubuntu \
 	&& mkdir -p /var/lib/systemd/linger \
 	&& touch /var/lib/systemd/linger/exedev
 
+COPY --chown=exedev:exedev vm/gitconfig /home/exedev/.gitconfig
+
 # SSH commands need this PATH before .bashrc returns for noninteractive shells.
 RUN sed -i '1i export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH"' /home/exedev/.bashrc \
 	&& printf 'export XDG_RUNTIME_DIR="/run/user/$(id -u)"\n' >>/home/exedev/.bashrc \

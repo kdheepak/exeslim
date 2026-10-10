@@ -1,0 +1,12 @@
+[core]
+	excludesFile = /home/exedev/.gitignore
+[pull]
+	rebase = true
+[user]
+	name = Shelley
+	email = shelley@exe.dev
+	useConfigOnly = true
+[github]
+	user = exedev-shelley
+[shelley]
+	no-trailer = true

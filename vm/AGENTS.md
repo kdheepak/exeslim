@@ -6,7 +6,7 @@ Only use documented exe.dev features (see https://exe.dev/docs.md). Undocumented
 
 ## This VM runs exeslim, not exeuntu
 
-This deployment image includes systemd, TLS roots, curl, rsync, and mise.
+This deployment image includes systemd, TLS roots, curl, rsync, Git, jq, and mise.
 Mise installs standalone pi, fd, and ripgrep. exe.dev installs Shelley when
 it creates the VM.
 Do not assume the full exeuntu toolbox is present.
@@ -16,11 +16,18 @@ Do not assume the full exeuntu toolbox is present.
 **pi:** Run `pi`. The bundled extension uses attached exe.dev LLM integrations.
 Mise shims are on PATH. Its VM config is `~/.config/mise/config.toml`.
 
-**Not installed:** compiler/`build-essential`, Node.js, Go, uv, git,
+**Not installed:** compiler/`build-essential`, Node.js, Go, uv,
 Docker, nginx, or Chrome. No Claude, Codex, or OpenCode agent is installed.
 Use mise for additional tools or `sudo apt-get install <pkg>` for system
 packages only when needed. Prefer building artifacts elsewhere and copying
 them here.
+
+**Setup:** One attached GitHub integration whose comment contains `exeslim-setup`
+opts into running that repository's `mise run apply`. Setup retries until
+completion is recorded, then does not pull updates or reapply on reboot.
+Read its logs with `journalctl -u exeslim-setup`.
+The checkout is `~/.local/share/exeslim/setup`;
+the completion record is `~/.local/state/exeslim/setup.json`.
 
 **Services are systemd units.** Start/stop with `systemctl`. Read logs with
 `journalctl -u <name>` without sudo. Journals persist across reboots.

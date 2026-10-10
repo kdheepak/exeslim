@@ -28,7 +28,7 @@ RUN apt-get update \
 		dist-upgrade \
 	&& DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 		systemd systemd-sysv dbus dbus-user-session \
-		ca-certificates curl rsync \
+		ca-certificates curl rsync git jq \
 		# iproute2 for `ss`. ~1 MB, and it is the difference between seeing
 		# and guessing when a unit is active but the proxy returns nothing —
 		# 0.0.0.0:8000 (proxy can reach it) vs 127.0.0.1:8000 (it cannot).
@@ -123,6 +123,12 @@ COPY vm/tmpfiles-tmp.conf /etc/tmpfiles.d/tmp.conf
 COPY vm/exe-setup.service /etc/systemd/system/exe-setup.service
 RUN chmod 644 /etc/systemd/system/exe-setup.service \
 	&& systemctl enable exe-setup.service
+
+COPY vm/exeslim-setup /usr/local/libexec/exeslim-setup
+COPY vm/exeslim-setup.service vm/exeslim-setup.timer /etc/systemd/system/
+RUN chmod 755 /usr/local/libexec/exeslim-setup \
+	&& chmod 644 /etc/systemd/system/exeslim-setup.service /etc/systemd/system/exeslim-setup.timer \
+	&& systemctl enable exeslim-setup.timer
 
 # exe.dev installs the binary; these units start Shelley on demand.
 COPY vm/shelley.service vm/shelley.socket /etc/systemd/system/

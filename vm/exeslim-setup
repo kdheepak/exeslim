@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+umask 077
+
+fail() {
+	printf 'exeslim-setup: %s\n' "$*" >&2
+	exit 1
+}
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/exeslim"
+data_dir="${XDG_DATA_HOME:-$HOME/.local/share}/exeslim"
+checkout="$data_dir/setup"
+marker="$state_dir/setup.json"
+reflection="${EXESLIM_REFLECTION_URL:-https://reflection.int.exe.xyz}"
+clone_tmp=""
+marker_tmp=""
+
+cleanup() {
+	[[ -z "$clone_tmp" ]] || rm -rf -- "$clone_tmp"
+	[[ -z "$marker_tmp" ]] || rm -f -- "$marker_tmp"
+}
+trap cleanup EXIT
+
+install -d -m 0700 "$state_dir"
+exec 9>"$state_dir/setup.lock"
+if flock -n -E 75 9; then
+	:
+else
+	status=$?
+	[[ "$status" == 75 ]] && exit 0
+	fail "Cannot acquire setup lock"
+fi
+
+if [[ -e "$marker" ]]; then
+	jq -e '
+		.version == 1 and
+		(.repository | type == "string" and length > 0) and
+		(.revision | type == "string" and test("^([0-9a-f]{40}|[0-9a-f]{64})$")) and
+		(.completed_at | type == "string" and length > 0)
+	' "$marker" >/dev/null || fail "Invalid completion record: $marker"
+	printf 'exeslim-setup: already completed; no automatic updates\n'
+	exit 0
+fi
+
+payload=$(curl --fail --silent --show-error --location --max-time 30 \
+	"${reflection%/}/integrations")
+matches=$(jq -ce '
+	if type != "object" or (.integrations | type) != "array" then
+		error("expected an integrations array")
+	else
+		[.integrations[] |
+			select(.type == "github") |
+			select((.comment // "") | contains("exeslim-setup"))]
+	end
+' <<< "$payload")
+
+case "$(jq 'length' <<< "$matches")" in
+	0)
+		printf 'exeslim-setup: no GitHub integration marked exeslim-setup\n'
+		exit 0
+		;;
+	1) ;;
+	*) fail "Multiple GitHub integrations are marked exeslim-setup; attach only one" ;;
+esac
+
+help=$(jq -er '.[0].help | select(type == "string" and length > 0)' <<< "$matches")
+# Reflection exposes a clone command, not a repository URL. Never evaluate it.
+clone_pattern='^git[[:blank:]]+clone[[:blank:]]+(https://[A-Za-z0-9.-]+(:[0-9]+)?/[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+)[[:blank:]]*$'
+[[ "$help" =~ $clone_pattern ]] || fail "Expected help in the form: git clone https://host/owner/repo"
+repository=${BASH_REMATCH[1]}
+case "$repository" in
+	*/./*|*/../*|*/.|*/..) fail "Invalid repository URL" ;;
+esac
+
+install -d -m 0700 "$data_dir"
+[[ ! -L "$checkout" ]] || fail "Setup checkout must not be a symlink: $checkout"
+if [[ -e "$checkout" ]]; then
+	[[ -d "$checkout/.git" ]] || fail "Existing setup path is not a checkout: $checkout"
+	origin=$(git -C "$checkout" config --local --get remote.origin.url)
+	[[ "$origin" == "$repository" ]] || fail "Existing checkout belongs to a different repository"
+else
+	clone_tmp=$(mktemp -d "$data_dir/.setup-clone.XXXXXX")
+	git -c protocol.allow=never -c protocol.https.allow=always \
+		clone --depth=1 -- "$repository" "$clone_tmp/repo"
+	mv -- "$clone_tmp/repo" "$checkout"
+fi
+
+worktree_status=$(git -C "$checkout" status --porcelain)
+[[ -z "$worktree_status" ]] || fail "Setup checkout has local changes; refusing automatic execution"
+revision=$(git -C "$checkout" rev-parse HEAD)
+[[ "$revision" =~ ^([0-9a-f]{40}|[0-9a-f]{64})$ ]] || fail "Invalid checkout revision"
+[[ -f "$checkout/mise.toml" && ! -L "$checkout/mise.toml" ]] || fail "Setup repository must contain mise.toml"
+
+mise trust "$checkout/mise.toml"
+task=$(mise -C "$checkout" tasks info apply --json)
+task_source=$(jq -er '.source | select(type == "string" and length > 0)' <<< "$task")
+[[ "$task_source" == "$checkout/mise.toml" ]] || fail "The apply task must be defined in the setup repository's mise.toml"
+mise -C "$checkout" run apply </dev/null
+
+marker_tmp=$(mktemp "$state_dir/.setup.json.XXXXXX")
+jq -n --arg repository "$repository" --arg revision "$revision" \
+	--arg completed_at "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+	'{version: 1, repository: $repository, revision: $revision, completed_at: $completed_at}' \
+	> "$marker_tmp"
+mv -- "$marker_tmp" "$marker"
+marker_tmp=""
+printf 'exeslim-setup: completed at revision %s\n' "$revision"

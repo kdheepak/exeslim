@@ -4,17 +4,16 @@ https://exe.dev/docs/proxy.md has details about the exe.dev HTTPS proxy.
 
 Only use documented exe.dev features (see https://exe.dev/docs.md). Undocumented local endpoints are internal infrastructure—unstable and unsupported.
 
+Always use ASD-STE100 Simplified Technical English. Use a few words as possible.
+Pick every word meticulously and with purpose. Get straight to the point. Less is more.
+
 ## This VM runs exeslim, not exeuntu
 
 This deployment image includes systemd, TLS roots, curl, rsync, Git, jq, and mise.
-Mise installs standalone pi, fd, and ripgrep. exe.dev installs Shelley when
-it creates the VM.
+Mise installs standalone pi, fd, and ripgrep. exe.dev installs Shelley when it creates the VM.
 Do not assume the full exeuntu toolbox is present.
 
 **Image build:** `/etc/exeslim-build-id` contains this image's build ID.
-
-**pi:** Run `pi`. The bundled extension uses attached exe.dev LLM integrations.
-Mise shims are on PATH. Its VM config is `~/.config/mise/config.toml`.
 
 **Not installed:** compiler/`build-essential`, Node.js, Go, uv,
 Docker, nginx, or Chrome. No Claude, Codex, or OpenCode agent is installed.

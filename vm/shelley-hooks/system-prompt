@@ -1,0 +1,2 @@
+#!/bin/sh
+sed "/^The user's exe\.dev email is /d"

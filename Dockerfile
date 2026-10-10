@@ -165,6 +165,7 @@ RUN sed -i '1i export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH
 
 # Share VM instructions between Shelley and pi.
 COPY vm/AGENTS.md /home/exedev/.config/shelley/AGENTS.md
+COPY --chown=exedev:exedev --chmod=755 vm/shelley-hooks/system-prompt /home/exedev/.config/shelley/hooks/system-prompt
 RUN mkdir -p /home/exedev/.pi/agent \
 	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.pi/agent/AGENTS.md \
 	&& chown -R exedev:exedev /home/exedev/.config /home/exedev/.pi

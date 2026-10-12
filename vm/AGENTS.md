@@ -20,7 +20,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 ## Tools and dependencies
 
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
-  mise supplies pi, fd, ripgrep, and restic. 
+  mise supplies pi, fd, ripgrep, and restic.
   Use mise for additional tools or `sudo apt-get install <pkg>` for system
   packages only when needed.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
@@ -104,6 +104,3 @@ printf '%s\n' 'Unattended-Upgrade::Automatic-Reboot "false";' \
 
 - Report what changed, what was verified, and anything still unverified.
 - For deployed services, include the service name and user-facing URL.
-
-
-

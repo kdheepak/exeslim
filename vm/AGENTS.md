@@ -23,6 +23,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
   mise supplies pi, fd, ripgrep, and restic.
   Use mise for additional tools or `sudo apt-get install <pkg>` for system
   packages only when needed.
+- For example, use mise to install uv or mise to install rust for python or rust based projects.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
   or tools from other exe.dev images are installed. Check first.
 - Prefer existing project tooling. Use mise for additional development

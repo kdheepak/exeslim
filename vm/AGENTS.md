@@ -20,7 +20,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 ## Tools and dependencies
 
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
-  mise supplies pi, fd, ripgrep, and restic.
+  mise supplies pi, Codex, Claude Code, fd, ripgrep, and restic.
   Use mise for additional tools or `sudo apt-get install <pkg>` for system
   packages only when needed.
 - For example, use mise to install uv or mise to install rust for python or rust based projects.

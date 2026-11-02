@@ -58,6 +58,6 @@ To disable automatic discovery:
 sudo systemctl disable --now exeslim-setup.timer
 ```
 
-Git and jq are included in the image for discovery and cloning. Shelley and pi
-remain the image's only agents. Setup repositories may install other software,
-so their tasks must follow the policy you want for the VM.
+Git and jq are included in the image for discovery and cloning. Shelley, pi,
+Codex, and Claude Code are included. Setup repositories may install other
+software, so their tasks must follow the policy you want for the VM.

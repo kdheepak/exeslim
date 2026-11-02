@@ -1,5 +1,7 @@
 [tools]
 "aqua:BurntSushi/ripgrep" = "latest"
+"aqua:anthropics/claude-code" = "latest"
 "aqua:earendil-works/pi" = "latest"
+"aqua:openai/codex" = "latest"
 "aqua:restic/restic" = "latest"
 "aqua:sharkdp/fd" = "latest"

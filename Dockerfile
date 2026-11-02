@@ -176,9 +176,10 @@ COPY --chown=exedev:exedev vm/claude-settings.json /home/exedev/.claude/settings
 # Use standalone agents; no separate Node.js or npm installation is needed.
 COPY --from=ghcr.io/jdx/mise:2026.10.3@sha256:331890e7116dd3dbe6244900b75d1cb9aa4def4891181521801e4f7e9a3e50f7 /usr/local/bin/mise /usr/local/bin/mise
 COPY --chown=exedev:exedev vm/mise.toml /home/exedev/.config/mise/config.toml
+COPY --chown=exedev:exedev vm/mise.lock /home/exedev/.config/mise/mise.lock
 ENV PATH="/home/exedev/.local/share/mise/shims:/home/exedev/.local/bin:${PATH}"
 USER exedev
-RUN HOME=/home/exedev mise install \
+RUN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- pi --version \
 	&& HOME=/home/exedev mise exec -- codex --version \
 	&& HOME=/home/exedev mise exec -- claude --version \

@@ -20,11 +20,32 @@ ssh exe.dev new --name=my-service \
 
 - systemd with persistent logs and an `exedev` user with passwordless sudo.
 - Shelley, installed by exe.dev when it creates the VM.
-- mise-managed standalone pi, fd, and ripgrep. pi uses attached exe.dev LLM integrations.
-- curl, rsync, TLS certificates, and `ss`.
+- mise-managed standalone pi, Codex, Claude Code, fd, ripgrep, and restic.
+- Git, curl, rsync, jq, sqlite3, TLS certificates, and `ss`.
 
-No compiler, Python, Node.js, Go, uv, Git, Docker, nginx, or browser is
-preinstalled. Use mise for extra tools or apt for system packages.
+pi uses attached exe.dev LLM integrations. Configure authentication separately
+for Codex and Claude Code.
+
+No compiler, Node.js, Go, uv, Docker, nginx, or browser is preinstalled.
+Use mise for project tools or apt for system packages.
+
+## VM setup
+
+The [init wrapper](vm/init) prepares systemd and enables low-port binding.
+It remounts `/proc/sys` only when that path is a separate mount, before
+changing the kernel settings.
+
+A script passed with `new --setup-script` runs at first boot as `exedev`.
+[exe-setup.service](vm/exe-setup.service) loads `new --env` variables from
+`/etc/profile.d/exe-env.sh`, when readable, before running `/exe.dev/setup`.
+It removes the script after success or failure. Later boots skip setup unless
+the file is supplied again.
+
+Inspect failures with `systemctl status exe-setup.service` and
+`journalctl -u exe-setup.service`.
+
+Make scripts safe to repeat. For GitHub-based automatic setup, see
+[Setup integration](docs/setup.md).
 
 ## Run and maintain
 
@@ -32,14 +53,19 @@ preinstalled. Use mise for extra tools or apt for system packages.
 - Bind web apps to `0.0.0.0:8000` for the default HTTPS proxy.
 - Read service logs with `journalctl -u <service>`.
 - Check the image build ID in `/etc/exeslim-build-id`.
-- Make setup scripts safe to run again after a reboot.
 
-Automatic package upgrades are disabled. Weekly image builds do not update
-existing VMs. Recreate the VM from a new build or update packages manually:
+Ubuntu package updates and required reboots are automatic, even while users
+are logged in. Services must recover after a restart. See
+[VM instructions](vm/AGENTS.md#vm-setup) to disable automatic reboots without
+disabling updates.
 
-```sh
-sudo apt-get update && sudo apt-get dist-upgrade
-```
+Image builds install the versions in [vm/mise.lock](vm/mise.lock). The
+[tool update workflow](docs/tool-updates.md) opens weekly draft PRs. Mark them
+ready for review to run the image build.
+
+New images do not update existing VMs. Use `mise upgrade` to update their
+mise tools, or recreate them from a new image. Claude Code's auto-updater is
+disabled.
 
 Keep deployment files in your repository so you can recreate the VM.
 

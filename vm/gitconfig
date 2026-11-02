@@ -1,5 +1,7 @@
 [core]
 	excludesFile = /home/exedev/.gitignore
+[init]
+	defaultBranch = main
 [pull]
 	rebase = true
 [user]

@@ -184,6 +184,7 @@ RUN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- codex --version \
 	&& HOME=/home/exedev mise exec -- claude --version \
 	&& HOME=/home/exedev mise exec -- fd --version \
+	&& HOME=/home/exedev mise exec -- fj --version \
 	&& HOME=/home/exedev mise exec -- rg --version \
 	&& HOME=/home/exedev mise exec -- restic version \
 	&& rm -rf /home/exedev/.cache/mise /home/exedev/.local/share/mise/downloads

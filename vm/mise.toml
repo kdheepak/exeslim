@@ -5,3 +5,4 @@
 "aqua:openai/codex" = "latest"
 "aqua:restic/restic" = "latest"
 "aqua:sharkdp/fd" = "latest"
+"forgejo:rasterstate/fj" = { version = "latest", api_url = "https://rasterhub.com/api/v1", strip_components = 1 }

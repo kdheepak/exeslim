@@ -4,6 +4,18 @@
 	defaultBranch = main
 [pull]
 	rebase = true
+[push]
+	default = simple
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[merge]
+	conflictStyle = zdiff3
+	log = true
+[diff]
+	algorithm = histogram
+[commit]
+	verbose = true
 [user]
 	name = Shelley
 	email = shelley@exe.dev

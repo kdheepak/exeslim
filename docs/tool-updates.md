@@ -8,7 +8,7 @@ Linux x64 downloads, and checksums. Image builds install these locked versions.
 The **Update mise lockfiles** workflow runs each Monday at 09:00 UTC. It also
 supports manual runs from the Actions tab.
 
-The workflow uses the mise version pinned in `Dockerfile`. It updates all six
+The workflow uses the mise version pinned in `Dockerfile`. It updates all
 VM tools together, checks that the locked tools install on Linux, and opens
 one draft PR from `automation/mise-lockfiles`. It does not update the root
 `mise.toml` task tools.
@@ -32,5 +32,5 @@ Use the mise version pinned in `Dockerfile`, then run:
 mise -C vm lock --upgrade --bump --platform linux-x64
 ```
 
-Review `vm/mise.lock` before merging. The native aqua tools do not need
+Review `vm/mise.lock` before merging. The native tools do not need
 npm or Python dependency sidecars.

@@ -19,17 +19,27 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 
 ## Tools and dependencies
 
+- Always use mise to install, select, and update development tools and
+  language runtimes. This includes Codex, Claude Code, fj, uv, and Rust.
+- Before installing anything, check `mise ls` and `mise which <command>`.
+  A missing command can be a PATH problem, not a missing installation.
+- Use `mise install` for configured tools; use `mise install --locked` when
+  their configuration has a lockfile. Use `mise use <tool>@<version>` to add
+  project tools. Prefer pinned project versions over global changes.
+- If the shell cannot find a tool, try `mise exec -- <command>` and check
+  the mise shims and PATH. Use `mise reshim` to rebuild missing shims.
+  Do not install another copy to work around a PATH problem.
+- Do not use vendor installation scripts, shell-piped downloads, Homebrew,
+  or global npm/pip installs for development tools. If mise cannot supply
+  a required tool, stop and ask before using another installation method.
+- Use apt only for operating-system packages, not as an alternative to mise
+  for development tools. Use project package managers for project dependencies.
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
   mise supplies pi, Codex, Claude Code, fd, fj, ripgrep, and restic.
   Use `fj` for Forgejo and Gitea-compatible hosts.
-  Use mise for additional tools or `sudo apt-get install <pkg>` for system
-  packages only when needed.
-- For example, use mise to install uv or mise to install rust for python or rust based projects.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
   or tools from other exe.dev images are installed. Check first.
-- Prefer existing project tooling. Use mise for additional development
-  tools and apt for system packages; install only what the task needs.
-- Prefer project-scoped, pinned tool versions over changing global defaults.
+- Prefer existing project tooling; install only what the task needs.
 - Keep this VM small: deploy existing build artifacts when appropriate,
   but install build tools when the requested work actually requires them.
 - Prefer building artifacts elsewhere and copying them here.

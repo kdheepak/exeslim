@@ -34,6 +34,11 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
   a required tool, stop and ask before using another installation method.
 - Use apt only for operating-system packages, not as an alternative to mise
   for development tools. Use project package managers for project dependencies.
+- Always use uv for Python work. Install and manage uv through mise.
+  Use `uv run python ...`, `uv run path/to/script.py`, and `uv run <tool> ...`.
+  Use `uv venv` for environments and `uv add`, `uv sync`, or `uv pip ...`
+  for dependencies. Never invoke `python`, `python3`, `pip`, or `pip3`
+  directly, including `python -m pip`.
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
   mise supplies pi, Codex, Claude Code, fd, fj, ripgrep, and restic.
   Use `fj` for Forgejo and Gitea-compatible hosts.

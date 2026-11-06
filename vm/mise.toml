@@ -1,4 +1,6 @@
 [tools]
+mr-boxington = "latest"
+rust = { version = "latest", mr_boxington = true }
 "aqua:BurntSushi/ripgrep" = "latest"
 "aqua:anthropics/claude-code" = "latest"
 "aqua:earendil-works/pi" = "latest"

@@ -21,12 +21,13 @@ ssh exe.dev new --name=my-service \
 - systemd with persistent logs and an `exedev` user with passwordless sudo.
 - Shelley, installed by exe.dev when it creates the VM.
 - mise-managed standalone pi, Codex, Claude Code, fd, ripgrep, and restic.
+- Rust with Mr. Boxington enabled for mise-managed Cargo commands.
 - Git, curl, rsync, jq, sqlite3, TLS certificates, and `ss`.
 
 pi uses attached exe.dev LLM integrations. Configure authentication separately for Codex and Claude
 Code.
 
-No compiler, Node.js, Go, uv, Docker, nginx, or browser is preinstalled. Use mise for project tools
+No Node.js, Go, uv, Docker, nginx, or browser is preinstalled. Use mise for project tools
 or apt for system packages.
 
 ## VM setup

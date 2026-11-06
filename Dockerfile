@@ -187,6 +187,9 @@ RUN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- fj --version \
 	&& HOME=/home/exedev mise exec -- rg --version \
 	&& HOME=/home/exedev mise exec -- restic version \
+	&& HOME=/home/exedev mise exec -- rustc --version \
+	&& HOME=/home/exedev mise exec -- cargo --version \
+	&& HOME=/home/exedev mise exec -- mbx --version \
 	&& rm -rf /home/exedev/.cache/mise /home/exedev/.local/share/mise/downloads
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/

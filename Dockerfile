@@ -166,14 +166,12 @@ RUN sed -i '1i export PATH="$HOME/.local/share/mise/shims:$HOME/.local/bin:$PATH
 # Share VM instructions between coding agents.
 COPY vm/AGENTS.md /home/exedev/.config/shelley/AGENTS.md
 COPY --chown=exedev:exedev --chmod=755 vm/shelley-hooks/system-prompt /home/exedev/.config/shelley/hooks/system-prompt
-RUN mkdir -p /home/exedev/.pi/agent /home/exedev/.codex /home/exedev/.claude /home/exedev/.config/maki \
+RUN mkdir -p /home/exedev/.pi/agent /home/exedev/.codex /home/exedev/.claude \
 	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.pi/agent/AGENTS.md \
 	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.codex/AGENTS.md \
 	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.claude/CLAUDE.md \
-	&& ln -s /home/exedev/.config/shelley/AGENTS.md /home/exedev/.config/maki/AGENTS.md \
 	&& chown -R exedev:exedev /home/exedev/.config /home/exedev/.pi /home/exedev/.codex /home/exedev/.claude
 COPY --chown=exedev:exedev vm/claude-settings.json /home/exedev/.claude/settings.json
-COPY --chown=exedev:exedev vm/maki-init.lua /home/exedev/.config/maki/init.lua
 
 # Use standalone agents; no separate Node.js or npm installation is needed.
 COPY --from=ghcr.io/jdx/mise:2026.10.3@sha256:331890e7116dd3dbe6244900b75d1cb9aa4def4891181521801e4f7e9a3e50f7 /usr/local/bin/mise /usr/local/bin/mise
@@ -193,7 +191,16 @@ RUN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- rustc --version \
 	&& HOME=/home/exedev mise exec -- cargo --version \
 	&& HOME=/home/exedev mise exec -- mbx --version \
+	&& HOME=/home/exedev mise exec -- chezmoi --version \
 	&& rm -rf /home/exedev/.cache/mise /home/exedev/.local/share/mise/downloads
+# chezmoi source for home configuration. Kept after the tool layer so config
+# edits do not reinstall tools. Re-apply on the VM with
+# `chezmoi apply --source /usr/local/share/exeslim/dotfiles`.
+COPY vm/dotfiles/ /usr/local/share/exeslim/dotfiles/
+RUN HOME=/home/exedev mise exec -- chezmoi apply --no-tty --source /usr/local/share/exeslim/dotfiles \
+	&& test -L /home/exedev/.config/maki/AGENTS.md \
+	&& test -f /home/exedev/.config/maki/init.lua \
+	&& rm -rf /home/exedev/.cache/chezmoi
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/
 COPY --from=pi-catalog --chown=exedev:exedev /catalog.json /home/exedev/.pi/agent/extensions/exe-dev/catalog.json
@@ -247,7 +254,7 @@ LABEL "exe.dev/install-shelley"="true"
 ARG BUILD_ID=dev
 RUN printf '%s\n' "$BUILD_ID" > /etc/exeslim-build-id
 LABEL org.opencontainers.image.title="exeslim" \
-	org.opencontainers.image.description="Small exe.dev base image with systemd, Shelley support, mise-managed pi, Codex, Claude Code, maki, and rsync." \
+	org.opencontainers.image.description="Small exe.dev base image with systemd, Shelley support, mise-managed pi, Codex, Claude Code, maki, chezmoi, and rsync." \
 	org.opencontainers.image.source="https://github.com/kdheepak/exeslim" \
 	org.opencontainers.image.url="https://github.com/kdheepak/exeslim" \
 	org.opencontainers.image.licenses="MIT" \

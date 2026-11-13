@@ -86,6 +86,17 @@ checksum_source = "mise-versions"
 url = "https://github.com/tontinton/maki/releases/download/v0.7.0/maki-v0.7.0-x86_64-unknown-linux-musl.tar.gz"
 url_api = "https://api.github.com/repos/tontinton/maki/releases/assets/695215404"
 
+[[tools."github:twpayne/chezmoi"]]
+version = "2.74.0"
+backend = "github:twpayne/chezmoi"
+specifiers = ["latest"]
+
+[tools."github:twpayne/chezmoi"."platforms.linux-x64"]
+checksum = "sha256:1b98a567f726f41540414aea4caf912699d53e248b29ccf8369cf553657b2374"
+url = "https://github.com/twpayne/chezmoi/releases/download/v2.74.0/chezmoi_2.74.0_linux-glibc_amd64.tar.gz"
+url_api = "https://api.github.com/repos/twpayne/chezmoi/releases/assets/698495837"
+provenance = "github-attestations"
+
 [[tools.mr-boxington]]
 version = "1.29.0"
 backend = "packslip:github.com/jdx/mr-boxington"

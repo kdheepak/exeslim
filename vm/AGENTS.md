@@ -40,7 +40,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
   for dependencies. Never invoke `python`, `python3`, `pip`, or `pip3`
   directly, including `python -m pip`.
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
-  mise supplies pi, Codex, Claude Code, maki, fd, fj, ripgrep, and restic.
+  mise supplies pi, Codex, Claude Code, maki, chezmoi, fd, fj, ripgrep, and restic.
   Use `fj` for Forgejo and Gitea-compatible hosts.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
   or tools from other exe.dev images are installed. Check first.
@@ -93,6 +93,8 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 - Inspect `journalctl -u exeslim-setup.service` when troubleshooting.
 - Do not delete the completion record, reset the checkout, discard local
   changes, or rerun its `apply` task merely to “fix” setup.
+- The image's home defaults are a chezmoi source at
+  `/usr/local/share/exeslim/dotfiles`. Do not re-apply it over local edits.
 - Record durable configuration changes in the appropriate repository
   rather than leaving undocumented edits on the VM.
 - The VM reboots when an update requests it, even while users are logged in.

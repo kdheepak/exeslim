@@ -75,6 +75,17 @@ checksum = "sha256:9303b1ad7a97544cb07fcc9d53fdf717dbfcb5ac69c9761ef23aec0961e80
 url = "https://rasterhub.com/rasterstate/fj/releases/download/v0.7.0/fj-v0.7.0-linux-x86_64.tar.gz"
 url_api = "https://rasterhub.com/attachments/a9c68fba-69da-43a7-a994-eecfbdc9a5a9"
 
+[[tools."github:tontinton/maki"]]
+version = "0.7.0"
+backend = "github:tontinton/maki"
+specifiers = ["latest"]
+
+[tools."github:tontinton/maki"."platforms.linux-x64"]
+checksum = "sha256:3e0a1d1a4bc2bbaafdeb94f2a551bcc2d0f6ed81edfd9dd13272d9caa5add787"
+checksum_source = "mise-versions"
+url = "https://github.com/tontinton/maki/releases/download/v0.7.0/maki-v0.7.0-x86_64-unknown-linux-musl.tar.gz"
+url_api = "https://api.github.com/repos/tontinton/maki/releases/assets/695215404"
+
 [[tools.mr-boxington]]
 version = "1.29.0"
 backend = "packslip:github.com/jdx/mr-boxington"

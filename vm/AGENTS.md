@@ -20,7 +20,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
 ## Tools and dependencies
 
 - Always use mise to install, select, and update development tools and
-  language runtimes. This includes Codex, Claude Code, fj, uv, and Rust.
+  language runtimes. This includes Codex, Claude Code, maki, fj, uv, and Rust.
 - Before installing anything, check `mise ls` and `mise which <command>`.
   A missing command can be a PATH problem, not a missing installation.
 - Use `mise install` for configured tools; use `mise install --locked` when
@@ -40,7 +40,7 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
   for dependencies. Never invoke `python`, `python3`, `pip`, or `pip3`
   directly, including `python -m pip`.
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
-  mise supplies pi, Codex, Claude Code, fd, fj, ripgrep, and restic.
+  mise supplies pi, Codex, Claude Code, maki, fd, fj, ripgrep, and restic.
   Use `fj` for Forgejo and Gitea-compatible hosts.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
   or tools from other exe.dev images are installed. Check first.

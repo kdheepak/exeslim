@@ -20,12 +20,13 @@ ssh exe.dev new --name=my-service \
 
 - systemd with persistent logs and an `exedev` user with passwordless sudo.
 - Shelley, installed by exe.dev when it creates the VM.
-- mise-managed standalone pi, Codex, Claude Code, fd, ripgrep, and restic.
+- mise-managed standalone pi, Codex, Claude Code, maki, fd, ripgrep, and restic.
 - Rust with Mr. Boxington enabled for mise-managed Cargo commands.
 - Git, curl, rsync, jq, sqlite3, TLS certificates, and `ss`.
 
-pi uses attached exe.dev LLM integrations. Configure authentication separately for Codex and Claude
-Code.
+pi uses attached exe.dev LLM integrations. Configure authentication separately for Codex, Claude
+Code, and maki. maki's default `~/.config/maki/init.lua` loads
+[maki-claude](https://github.com/bzzimmy/maki-claude), which adds a Claude Pro/Max provider.
 
 No Node.js, Go, uv, Docker, nginx, or browser is preinstalled. Use mise for project tools
 or apt for system packages.
@@ -58,7 +59,7 @@ reboots without disabling updates.
 Image builds install the versions in [vm/mise.lock](vm/mise.lock).
 
 New images do not update existing VMs. Use `mise upgrade` to update their mise tools, or recreate
-them from a new image. Claude Code's auto-updater is disabled.
+them from a new image. Claude Code's auto-updater is disabled. Do not use `maki update`; it bypasses mise.
 
 Keep deployment files in your repository so you can recreate the VM.
 

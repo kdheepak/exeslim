@@ -200,6 +200,7 @@ COPY vm/dotfiles/ /usr/local/share/exeslim/dotfiles/
 RUN HOME=/home/exedev mise exec -- chezmoi apply --no-tty --source /usr/local/share/exeslim/dotfiles \
 	&& test -L /home/exedev/.config/maki/AGENTS.md \
 	&& test -f /home/exedev/.config/maki/init.lua \
+	&& test -f /home/exedev/.config/maki/themes/rose_pine_tinted.toml \
 	&& rm -rf /home/exedev/.cache/chezmoi
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/

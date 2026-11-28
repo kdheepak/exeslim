@@ -1,0 +1,3 @@
+#!/bin/sh
+# Use the active mise version and make vim work in noninteractive shells.
+exec nvim "$@"

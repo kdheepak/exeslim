@@ -207,6 +207,7 @@ COPY vm/dotfiles/ /usr/local/share/exeslim/dotfiles/
 RUN HOME=/home/exedev mise exec -- chezmoi apply --no-tty --source /usr/local/share/exeslim/dotfiles \
 	&& test -s /home/exedev/.pi/agent/settings.json \
 	&& test -s /home/exedev/.pi/agent/keybindings.json \
+	&& HOME=/home/exedev vim --version \
 	&& rm -rf /home/exedev/.cache/chezmoi
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/

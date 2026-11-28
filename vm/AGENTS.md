@@ -38,8 +38,8 @@ Pick every word meticulously and with purpose. Get straight to the point. Less i
   for dependencies. Never invoke `python`, `python3`, `pip`, or `pip3`
   directly, including `python -m pip`.
 - The image includes Git, curl, rsync, jq, sqlite3, ss, and mise.
-  mise supplies Pi, Codex, Claude Code, Herdr Core, chezmoi, fd, fj, ripgrep, and restic.
-  Use `fj` for Forgejo and Gitea-compatible hosts.
+  mise supplies Pi, Codex, Claude Code, Herdr Core, chezmoi, fd, fj, Neovim, ripgrep, and restic.
+  Use `vim` or `nvim` for Neovim. Use `fj` for Forgejo and Gitea-compatible hosts.
 - Use `hc` for persistent terminals. Use mise, not `hc update`, to update Herdr Core.
 - Do not assume language runtimes, compilers, uv, Docker, a browser,
   or tools from other exe.dev images are installed. Check first.

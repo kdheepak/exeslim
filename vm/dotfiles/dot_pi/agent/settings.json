@@ -1,0 +1,20 @@
+{
+  "$schema": "https://pi.dev/schemas/settings.schema.json",
+  "codemode": {
+    "mode": "only"
+  },
+  "collapseChangelog": true,
+  "defaultTools": ["+codemode"],
+  "doubleEscapeAction": "tree",
+  "enableInstallTelemetry": false,
+  "fullscreenExitOutput": "resume-hint",
+  "fullscreenScrollbar": "always",
+  "hideThinkingBlock": false,
+  "quietStartup": true,
+  "showHardwareCursor": true,
+  "terminal": {
+    "showTerminalProgress": true
+  },
+  "theme": "dark",
+  "tuiMode": "fullscreen"
+}

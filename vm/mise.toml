@@ -8,5 +8,16 @@ rust = { version = "latest", mr_boxington = true }
 "aqua:restic/restic" = "latest"
 "aqua:sharkdp/fd" = "latest"
 "forgejo:rasterstate/fj" = { version = "latest", api_url = "https://rasterhub.com/api/v1", strip_components = 1 }
-"github:tontinton/maki" = "latest"
 "github:twpayne/chezmoi" = "latest"
+
+# Herdr Core publishes separately from the herdr multiplexer.
+[tools."http:herdr-core"]
+version = "latest"
+version_list_url = "https://releases.herdr.dev/core/latest.json"
+version_json_path = ".version"
+checksum_url = "https://releases.herdr.dev/core/{{ version }}/manifest.json"
+checksum_expr = '"sha256:" + fromJSON(body).targets["linux-x86_64"].sha256'
+rename_exe = "hc"
+
+[tools."http:herdr-core".platforms.linux-x64]
+url = "https://releases.herdr.dev/core/{{ version }}/herdr-core-linux-x86_64.tar.gz"

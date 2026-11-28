@@ -190,7 +190,7 @@ RUN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- pi --version \
 	&& HOME=/home/exedev mise exec -- codex --version \
 	&& HOME=/home/exedev mise exec -- claude --version \
-	&& HOME=/home/exedev mise exec -- maki --version \
+	&& HOME=/home/exedev mise exec -- hc --version \
 	&& HOME=/home/exedev mise exec -- fd --version \
 	&& HOME=/home/exedev mise exec -- fj --version \
 	&& HOME=/home/exedev mise exec -- rg --version \
@@ -205,9 +205,8 @@ RUN HOME=/home/exedev mise install --locked \
 # `chezmoi apply --source /usr/local/share/exeslim/dotfiles`.
 COPY vm/dotfiles/ /usr/local/share/exeslim/dotfiles/
 RUN HOME=/home/exedev mise exec -- chezmoi apply --no-tty --source /usr/local/share/exeslim/dotfiles \
-	&& test -L /home/exedev/.config/maki/AGENTS.md \
-	&& test -f /home/exedev/.config/maki/init.lua \
-	&& test -f /home/exedev/.config/maki/themes/rose_pine_tinted.toml \
+	&& test -s /home/exedev/.pi/agent/settings.json \
+	&& test -s /home/exedev/.pi/agent/keybindings.json \
 	&& rm -rf /home/exedev/.cache/chezmoi
 USER root
 COPY --chown=exedev:exedev vm/pi-extension/ /home/exedev/.pi/agent/extensions/exe-dev/
@@ -262,7 +261,7 @@ LABEL "exe.dev/install-shelley"="true"
 ARG BUILD_ID=dev
 RUN printf '%s\n' "$BUILD_ID" > /etc/exeslim-build-id
 LABEL org.opencontainers.image.title="exeslim" \
-	org.opencontainers.image.description="Small exe.dev base image with systemd, Shelley support, mise-managed pi, Codex, Claude Code, maki, chezmoi, and rsync." \
+	org.opencontainers.image.description="Small exe.dev base image with systemd, Shelley support, mise-managed pi, Codex, Claude Code, Herdr Core, chezmoi, and rsync." \
 	org.opencontainers.image.source="https://github.com/kdheepak/exeslim" \
 	org.opencontainers.image.url="https://github.com/kdheepak/exeslim" \
 	org.opencontainers.image.licenses="MIT" \

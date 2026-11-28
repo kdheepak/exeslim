@@ -84,6 +84,9 @@ jobs:
           no-cache: ${{ github.event_name == 'schedule' }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          # The lockfile pins tool archives, but mise still fetches declared skills.
+          secrets: |
+            mise_github_token=${{ github.token }}
           # Overrides the "24.04" version label inherited from ubuntu:24.04.
           build-args: |
             BUILD_ID=${{ steps.tag.outputs.build }}

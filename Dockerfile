@@ -186,7 +186,8 @@ COPY --chown=exedev:exedev vm/mise.toml /home/exedev/.config/mise/config.toml
 COPY --chown=exedev:exedev vm/mise.lock /home/exedev/.config/mise/mise.lock
 ENV PATH="/home/exedev/.local/share/mise/shims:/home/exedev/.local/bin:${PATH}"
 USER exedev
-RUN HOME=/home/exedev mise install --locked \
+# Avoid GitHub API rate limits without storing a token in the image.
+RUN --mount=type=secret,id=mise_github_token,env=MISE_GITHUB_TOKEN HOME=/home/exedev mise install --locked \
 	&& HOME=/home/exedev mise exec -- pi --version \
 	&& HOME=/home/exedev mise exec -- codex --version \
 	&& HOME=/home/exedev mise exec -- claude --version \
